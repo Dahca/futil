@@ -21,6 +21,7 @@ int main(int argc, char **argv, char **env) {
   if (argc >= 4) {
     trace = std::strcmp(argv[3], "--trace") == 0;
   }
+
   printf("Tracing: %d\n", trace);
   VerilatedVcdC *tfp;
   if (trace) {
@@ -34,9 +35,9 @@ int main(int argc, char **argv, char **env) {
   top->clk = 0;
   top->go = 1;
   int done = 0;
+
   printf("Starting simulation\n");
   while (done == 0 && i < n_cycles) {
-    done = top->done;
     // dump variables into VCD file and toggle clock
     for (clk = 0; clk < 2; clk++) {
       if (trace) {
@@ -49,6 +50,7 @@ int main(int argc, char **argv, char **env) {
     if (Verilated::gotFinish())
       exit(0);
 
+    done = top->done;
     i++;
   }
 
