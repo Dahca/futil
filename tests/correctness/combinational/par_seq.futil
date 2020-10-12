@@ -1,0 +1,36 @@
+import "primitives/std.lib";
+
+component main() -> () {
+  cells {
+    addl = prim std_add(32);
+    addr = prim std_add(32);
+    sub = prim std_sub(32);
+  }
+
+  wires {
+    group L<"combinational"=1> {
+      addl.left = 32'd2;
+      addl.right = 32'd2;
+      L[done] = L[go] ? 1'b1;
+    }
+
+    group R<"combinational"=1> {
+      addr.left = 32'd1;
+      addr.right = 32'd1;
+      R[done] = R[go] ? 1'b1;
+    }
+
+    group S<"combinational"=1> {
+      sub.left = addl.out;
+      sub.right = addr.out;
+      S[done] = S[go] ? 1'b1;
+    }
+  }
+
+  control {
+    seq {
+      par { L; R; }
+      S;
+    }
+  }
+}

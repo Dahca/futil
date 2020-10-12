@@ -77,6 +77,16 @@ fud e --from systolic --to vcd_json \
 
 """
 
+[[tests]]
+name = "combinational correctness"
+paths = [ "tests/correctness/combinational/*.futil" ]
+cmd = """
+fud e {} --to vcd_json \
+      -s futil.exec './target/debug/futil' \
+      -q \
+      | jq -f {}.jq
+"""
+
 ##### Backend Tests #####
 [[tests]]
 name = "verilog backend"

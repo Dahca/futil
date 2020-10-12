@@ -1,0 +1,45 @@
+import "primitives/std.lib";
+
+component main() -> () {
+  cells {
+    add0 = prim std_add(32);
+    add1 = prim std_add(32);
+    s = prim std_reg(32);
+    add2 = prim std_add(32);
+  }
+
+  wires {
+    group A<"combinational"=1> {
+      add0.left = 32'd1;
+      add0.right = 32'd1;
+      A[done] = A[go] ? 1'b1;
+    }
+
+    group B<"combinational"=1> {
+      add1.left = 32'd1;
+      add1.right = add0.out;
+      B[done] = B[go] ? 1'b1;
+    }
+
+    group save {
+      s.in = add1.out;
+      s.write_en = 1'b1;
+      save[done] = s.done;
+    }
+
+    group C<"combinational"=1> {
+      add2.left = s.out;
+      add2.right = s.out;
+      C[done] = C[go] ? 1'b1;
+    }
+  }
+
+  control {
+    seq {
+      A;
+      B;
+      save;
+      C;
+    }
+  }
+}

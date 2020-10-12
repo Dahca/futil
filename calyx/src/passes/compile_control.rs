@@ -25,6 +25,38 @@ impl Named for CompileControl {
     }
 }
 
+// fn latch_combinational(
+//     builder: &mut ir::Builder,
+//     ctrl_group: &ir::Group,
+//     group: ir::Port,
+//     group_name: &ir::Id,
+//     ctrl_done: ir::Guard,
+// ) -> Result<ir::Guard> {
+//     if let Some(&1) = ctrl_group.attributes.get("combinational") {
+//         structure!(
+//             builder;
+//             let signal_on = constant(1, 1);
+//             let signal_off = constant(0, 1);
+//             let latch = prim std_reg(1);
+//         );
+//         let done_guard = guard!(group["done"]);
+//         add_wires!(
+//             st, Some(ctrl_group.clone()),
+//             latch["in"] = done_guard ? (signal_on.clone());
+//             latch["write_en"] = done_guard ? (signal_on.clone());
+//         );
+//         // CLEANUP wires
+//         add_wires!(
+//             st, None,
+//             latch["in"] = ctrl_done ? (signal_off.clone());
+//             latch["write_en"] = ctrl_done ? (signal_on.clone());
+//         );
+//         Ok(guard!(latch["out"]))
+//     } else {
+//         Ok(guard!(group["done"]))
+//     }
+// }
+
 impl Visitor for CompileControl {
     /// This compiles `if` statements of the following form:
     /// ```C
@@ -253,88 +285,6 @@ impl Visitor for CompileControl {
         Ok(Action::Change(ir::Control::enable(while_group)))
     }
 
-    // fn finish_seq(
-    //     &mut self,
-    //     s: &ast::Seq,
-    //     comp: &mut Component,
-    //     ctx: &Context,
-    // ) -> VisResult {
-    //     let st = &mut comp.structure;
-
-    //     // Create a new group for the seq related structure.
-    //     let seq_group: ast::Id = st.namegen.gen_name("seq").into();
-    //     let seq_group_node = st.insert_group(&seq_group, HashMap::new())?;
-    //     let fsm_size = 32;
-
-    //     // new structure
-    //     structure!(st, &ctx,
-    //         let fsm = prim std_reg(fsm_size);
-    //         let signal_on = constant(1, 1);
-    //     );
-
-    //     // Generate fsm to drive the sequence
-    //     for (idx, con) in s.stmts.iter().enumerate() {
-    //         match con {
-    //             Control::Enable {
-    //                 data: Enable { comp: group_name },
-    //             } => {
-    //                 let my_idx: u64 = idx.try_into().unwrap();
-    //                 /* group[go] = fsm.out == idx & !group[done] ? 1 */
-    //                 let group = st.get_node_by_name(&group_name)?;
-
-    //                 structure!(st, &ctx,
-    //                     let fsm_cur_state = constant(my_idx, fsm_size);
-    //                     let fsm_nxt_state = constant(my_idx + 1, fsm_size);
-    //                 );
-
-    //                 let group_go = (guard!(st; fsm["out"])
-    //                     .eq(st.to_guard(fsm_cur_state.clone())))
-    //                     & !guard!(st; group["done"]);
-
-    //                 let group_done = (guard!(st; fsm["out"])
-    //                     .eq(st.to_guard(fsm_cur_state.clone())))
-    //                     & guard!(st; group["done"]);
-
-    //                 add_wires!(st, Some(seq_group.clone()),
-    //                     // Turn this group on.
-    //                     group["go"] = group_go ? (signal_on.clone());
-
-    //                     // Update the FSM state when this group is done.
-    //                     fsm["in"] = group_done ? (fsm_nxt_state.clone());
-    //                     fsm["write_en"] = group_done ? (signal_on.clone());
-    //                 );
-    //             }
-    //             _ => {
-    //                 return Err(Error::MalformedControl(
-    //                     "Cannot compile non-group statement inside sequence"
-    //                         .to_string(),
-    //                 ))
-    //             }
-    //         }
-    //     }
-
-    //     let final_state_val: u64 = s.stmts.len().try_into().unwrap();
-    //     structure!(st, &ctx,
-    //         let reset_val = constant(0, fsm_size);
-    //         let fsm_final_state = constant(final_state_val, fsm_size);
-    //     );
-    //     let seq_done = guard!(st; fsm["out"]).eq(st.to_guard(fsm_final_state));
-
-    //     // Condition for the seq group being done.
-    //     add_wires!(st, Some(seq_group.clone()),
-    //         seq_group_node["done"] = seq_done ? (signal_on.clone());
-    //     );
-
-    //     // CLEANUP: Reset the FSM state one cycle after the done signal is high.
-    //     add_wires!(st, None,
-    //         fsm["in"] = seq_done ? (reset_val);
-    //         fsm["write_en"] = seq_done ? (signal_on);
-    //     );
-
-    //     // Replace the control with the seq group.
-    //     Ok(Action::Change(Control::enable(seq_group)))
-    // }
-
     fn finish_seq(
         &mut self,
         s: &mut ir::Seq,
@@ -351,15 +301,10 @@ impl Visitor for CompileControl {
         structure!(builder;
             let fsm = prim std_reg(fsm_size);
             let signal_on = constant(1, 1);
-            let signal_off = constant(0, 1);
         );
 
-        let seq_done = guard!(st; seq_group_node["done"]);
-
-        let mut prev_done = None;
-
         // Generate fsm to drive the sequence
-        for (_idx, con) in s.stmts.iter().enumerate() {
+        for (idx, con) in s.stmts.iter().enumerate() {
             match con {
                 ir::Control::Enable(ir::Enable { group }) => {
                     let my_idx: u64 = idx.try_into().unwrap();
