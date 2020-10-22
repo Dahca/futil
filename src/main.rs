@@ -15,7 +15,7 @@ use pass_manager::PassManager;
 use passes::{
     ClkInsertion, CollapseControl, CompileControl, CompileEmpty,
     ComponentInterface, Externalize, GoInsertion, Inliner, Papercut,
-    RemoveExternalMemories, StaticTiming, WellFormed,
+    RemoveExternalMemories, StaticTiming, WellFormed, InferStaticTiming
 };
 use std::io::stdin;
 use structopt::StructOpt;
@@ -40,6 +40,7 @@ fn construct_pass_manager() -> FutilResult<PassManager> {
     register_pass!(pm, CompileEmpty);
     register_pass!(pm, Papercut);
     register_pass!(pm, ClkInsertion);
+    register_pass!(pm, InferStaticTiming);
 
     // Register aliases
     register_alias!(
@@ -51,6 +52,7 @@ fn construct_pass_manager() -> FutilResult<PassManager> {
             RemoveExternalMemories,
             CompileEmpty,
             CollapseControl,
+            InferStaticTiming,
             StaticTiming,
             CompileControl,
             GoInsertion,

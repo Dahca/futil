@@ -11,6 +11,7 @@ mod go_insertion;
 mod papercut;
 mod remove_external_memories;
 mod static_timing;
+mod infer_static_timing;
 
 pub use clk_insertion::ClkInsertion;
 pub use collapse_control::CollapseControl;
@@ -24,3 +25,4 @@ pub use papercut::Papercut;
 pub use remove_external_memories::RemoveExternalMemories;
 pub use static_timing::StaticTiming;
 pub use well_formed::WellFormed;
+pub use infer_static_timing::InferStaticTiming;
