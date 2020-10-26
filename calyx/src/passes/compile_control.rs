@@ -285,6 +285,7 @@ impl Visitor for CompileControl {
         Ok(Action::Change(ir::Control::enable(while_group)))
     }
 
+    /// XXX(sam) document
     fn finish_seq(
         &mut self,
         s: &mut ir::Seq,
@@ -295,41 +296,81 @@ impl Visitor for CompileControl {
 
         // Create a new group for the seq related structure.
         let seq_group = builder.add_group("seq", HashMap::new());
-        let fsm_size = 32;
 
         // new structure
-        structure!(builder;
-            let fsm = prim std_reg(fsm_size);
+        structure!(
+            builder;
             let signal_on = constant(1, 1);
+            let signal_off = constant(0, 1);
         );
 
-        // Generate fsm to drive the sequence
-        for (idx, con) in s.stmts.iter().enumerate() {
+        let seq_done = guard!(seq_group["done"]);
+
+        let mut prev_done = None;
+        for con in &s.stmts {
             match con {
                 ir::Control::Enable(ir::Enable { group }) => {
-                    let my_idx: u64 = idx.try_into().unwrap();
-                    /* group[go] = fsm.out == idx & !group[done] ? 1 */
-                    structure!(builder;
-                        let fsm_cur_state = constant(my_idx, fsm_size);
-                        let fsm_nxt_state = constant(my_idx + 1, fsm_size);
+                    structure!(
+                        builder;
+                        let started = prim std_reg(1);
                     );
 
-                    let group_go = guard!(fsm["out"])
-                        .eq(guard!(fsm_cur_state["out"]))
-                        .and(!guard!(group["done"]));
+                    let done_latch = if let Some(&1) =
+                        group.borrow().attributes.get("combinational")
+                    {
+                        structure!(
+                            builder;
+                            let done_latch = prim std_reg(1);
+                        );
+                        let done_guard = guard!(group["done"]);
+                        let mut in_group_assignments = build_assignments!(
+                            builder;
+                            done_latch["in"] = done_guard ? signal_on["out"];
+                            done_latch["write_en"] = done_guard ? signal_on["out"];
+                        );
+                        seq_group
+                            .borrow_mut()
+                            .assignments
+                            .append(&mut in_group_assignments);
+                        let mut reset_latch = build_assignments!(
+                            builder;
+                            done_latch["in"] = seq_done ? signal_off["out"];
+                            done_latch["write_en"] = seq_done ? signal_off["out"];
+                        );
+                        builder
+                            .component
+                            .continuous_assignments
+                            .append(&mut reset_latch);
+                        // bind to variable so that `done_latch` isn't dropped before we construct the guard
+                        let g = guard!(done_latch["done"]);
+                        g
+                    } else {
+                        guard!(group["done"])
+                    };
 
-                    let group_done = guard!(fsm["out"])
-                        .eq(guard!(fsm_cur_state["out"]))
-                        .and(guard!(group["done"]));
+                    let started_guard = prev_done
+                        .clone()
+                        .map(|g| g & !done_latch.clone())
+                        .unwrap_or(!done_latch.clone());
+                    let group_go = prev_done
+                        .clone()
+                        .map(|g| {
+                            (g | guard!(started["out"])) & !done_latch.clone()
+                        })
+                        .unwrap_or(!done_latch);
 
-                    let mut assigns = build_assignments!(builder;
-                        // Turn this group on.
+                    let mut assigns = build_assignments!(
+                        builder;
+                        // save groups start signal
+                        started["in"] = started_guard ? signal_on["out"];
+                        started["write_en"] = started_guard ? signal_on["out"];
+
+                        // turn this group on
                         group["go"] = group_go ? signal_on["out"];
-
-                        // Update the FSM state when this group is done.
-                        fsm["in"] = group_done ? fsm_nxt_state["out"];
-                        fsm["write_en"] = group_done ? signal_on["out"];
                     );
+
+                    prev_done = Some(guard!(group["done"]));
+
                     seq_group.borrow_mut().assignments.append(&mut assigns);
                 }
                 _ => {
@@ -341,23 +382,11 @@ impl Visitor for CompileControl {
             }
         }
 
-        let final_state_val: u64 = s.stmts.len().try_into().unwrap();
-        structure!(builder;
-            let reset_val = constant(0, fsm_size);
-            let fsm_final_state = constant(final_state_val, fsm_size);
-        );
-        let seq_done = guard!(fsm["out"]).eq(guard!(fsm_final_state["out"]));
-
-        // Condition for the seq group being done.
-        let mut assigns = build_assignments!(builder;
-            seq_group["done"] = seq_done ? signal_on["out"];
-        );
-        seq_group.borrow_mut().assignments.append(&mut assigns);
-
-        // CLEANUP: Reset the FSM state one cycle after the done signal is high.
-        let mut assigns = build_assignments!(builder;
-            fsm["in"] = seq_done ? reset_val["out"];
-            fsm["write_en"] = seq_done ? signal_on["out"];
+        let last_done =
+            prev_done.expect("Expected at least one group in the seq.");
+        let mut assigns = build_assignments!(
+            builder;
+            seq_group["done"] = last_done ? signal_on["out"];
         );
         comp.continuous_assignments.append(&mut assigns);
 
