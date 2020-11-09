@@ -1,0 +1,90 @@
+{
+  "in": {
+    "n": "int"
+  },
+  
+  "out": "int",
+
+  "locals": {
+    "i": "int",
+    "sum": "int"
+  },
+
+  "statements": [
+    {
+      "type": "assignment",
+      "name": "i",
+      "value": {
+        "type": "const",
+        "value": 0
+      }
+    },
+
+    {
+      "type": "assignment",
+      "name": "sum",
+      "value": {
+        "type": "const",
+        "value": 0
+      }
+    },
+
+    {
+      "type": "while",
+      "condition": {
+        "type": "binary",
+        "op": "lt",
+        "left": {
+          "type": "identifier",
+          "name": "i"
+        },
+        "right" : {
+          "type": "identifier",
+          "name": "n"
+        }
+      },
+      "body": [
+        {
+          "type":"assignment",
+          "name":"sum",
+          "value": {
+            "type": "binary",
+            "op": "add",
+            "left": {
+              "type": "identifier",
+              "name": "sum"
+            },
+            "right": {
+              "type": "identifier",
+              "name": "i"
+            }
+          }
+        },
+        {
+          "type":"assignment",
+          "name":"i",
+          "value": {
+            "type": "binary",
+            "op": "add",
+            "left": {
+              "type": "identifier",
+              "name": "i"
+            },
+            "right": {
+              "type": "const",
+              "value": 1
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "type": "return",
+      "value": {
+        "type": "identifier",
+        "name": "sum"
+      }
+    }
+  ]
+}
