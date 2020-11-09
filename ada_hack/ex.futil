@@ -11,9 +11,59 @@ component main() -> () {
         output =  prim std_mem_d1( 32, 
                                     1,
                                     1 ); 
+
+        
+        a = prim std_reg( 32 ); 
+        
+        b = prim std_reg( 32 ); 
+        
+        i = prim std_reg( 32 ); 
+        
+        prev = prim std_reg( 32 ); 
+        
     }
     wires {
-
+        
+        group group_0 {
+            
+                group_0[done] = a.done;
+            
+                a.write_en = 1'd1;
+            
+                a.in = 32'd0;
+            
+        }
+        
+        group group_1 {
+            
+                group_1[done] = b.done;
+            
+                b.write_en = 1'd1;
+            
+                b.in = 32'd1;
+            
+        }
+        
+        group group_2 {
+            
+                group_2[done] = i.done;
+            
+                i.write_en = 1'd1;
+            
+                i.in = 32'd0;
+            
+        }
+        
+        group group_3 {
+            
+                group_3[done] = prev.done;
+            
+                prev.write_en = 1'd1;
+            
+                prev.in = 32'd0;
+            
+        }
+        
     }
     control {
 
