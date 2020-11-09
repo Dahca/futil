@@ -1,0 +1,21 @@
+import "primitives/std.lib";
+
+component main() -> () {
+    cells {
+        
+        n = prim std_mem_d1( 32, 
+                                       1,
+                                       1 ); 
+        
+
+        output =  prim std_mem_d1( 32, 
+                                    1,
+                                    1 ); 
+    }
+    wires {
+
+    }
+    control {
+
+    }
+}

@@ -1,0 +1,21 @@
+import "primitives/std.lib";
+
+component main() -> () {
+    cells {
+        {% for input in prog['in'] %}
+        {{ input }} = prim std_mem_d1( {{ width[prog['in'][input]] }}, 
+                                       {{ size[prog['in'][input]] }},
+                                       {{ index_width[prog['in'][input]] }} ); 
+        {% endfor %}
+
+        output =  prim std_mem_d1( {{ width[prog['out']] }}, 
+                                    {{ size[prog['out']] }},
+                                    {{ index_width[prog['out']] }} ); 
+    }
+    wires {
+
+    }
+    control {
+
+    }
+}

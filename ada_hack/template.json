@@ -1,18 +1,4 @@
 {
-    "comment": "
-def fibonacci(n: int) -> int:
-	a = 0
-	b = 1
-	i = 0
-    prev = 0
-	while i < n:
-    		b = a + b
-    		a = prev
-   	 	    prev = b 
-    		i += 1
-	return prev
-    ",
-
     "in": {
         "n": "int"
     },
@@ -82,7 +68,7 @@ def fibonacci(n: int) -> int:
                         "op": "plus",
                         "left": {
                             "type": "identifier",
-                            "name": "a",
+                            "name": "a"
                         },
                         "right": {
                             "type": "identifier",
@@ -114,14 +100,14 @@ def fibonacci(n: int) -> int:
                         "op": "plus",
                         "left": {
                             "type": "identifier",
-                            "name": "i",
+                            "name": "i"
                         },
                         "right": {
                             "type": "const",
                             "name": 1
                         }
                     }
-                },
+                }
             ]
         },
         {
