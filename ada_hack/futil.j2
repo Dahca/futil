@@ -11,9 +11,19 @@ component main() -> () {
         output =  prim std_mem_d1( {{ width[prog['out']] }}, 
                                     {{ size[prog['out']] }},
                                     {{ index_width[prog['out']] }} ); 
+
+        {% for local in prog['locals'] %}
+        {{ local }} = prim std_reg( {{ width[prog['locals'][local]] }} ); 
+        {% endfor %}
     }
     wires {
-
+        {% for group in groups %}
+        group {{ group['name'] }} {
+            {% for line in group['lines'] %}
+                {{ line }}
+            {% endfor %}
+        }
+        {% endfor %}
     }
     control {
 
