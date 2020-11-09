@@ -14,20 +14,23 @@ index_width = {
     "int": 1,
 }
 
+
 def get_reg_width(prog, reg):
     reg_type = prog['locals'][reg]
     return width[reg_type]
+
 
 def generate_const(gname, reg, prog, value):
     reg_type = prog['locals'][reg]
     w = width[reg_type]
     v = value['value']
-    
+
     port = f"{w}'d{v}"
     lines = []
     cells = []
 
     return port, lines, cells
+
 
 def generate_indentifier(gname, reg, prog, value):
     name = value['name']
@@ -35,11 +38,12 @@ def generate_indentifier(gname, reg, prog, value):
         port = f"{name}.out"
     else:
         port = f"{name}.read_data"
-    
+
     lines = []
     cells = []
 
     return port, lines, cells
+
 
 def generate_binary(gname, reg, prog, value):
     op = value['op']
@@ -57,10 +61,10 @@ def generate_binary(gname, reg, prog, value):
 
     if op == 'plus':
         cells += [f"{aname} = prim std_add({regw});"]
-    
+
     lines += [f"{aname}.left = {lport};"]
     lines += [f"{aname}.right = {rport};"]
-    
+
     port = f"{aname}.out"
     return port, lines, cells
 
@@ -76,20 +80,34 @@ def generate_value(gname, reg, prog, value):
         print(value)
         return None, None, None
 
+
 def assign_reg(gname, prog, statement):
     reg = statement['name']
     value = statement['value']
     lines = []
 
-    lines += [ f"{gname}[done] = {reg}.done;" ]
-    lines += [ f"{reg}.write_en = 1'd1;"]
+    lines += [f"{gname}[done] = {reg}.done;"]
+    lines += [f"{reg}.write_en = 1'd1;"]
 
     port, sublines, cells = generate_value(gname, reg, prog, value)
-    
-    lines += sublines
-    lines += [ f"{reg}.in = {port};"]
 
-    return {'name': gname, 'lines': lines}, cells
+    lines += sublines
+    lines += [f"{reg}.in = {port};"]
+
+    return {
+        'name': gname,
+        'lines': lines,
+        'control': {"operator": 'enable', "group": gname}
+    }, cells
+
+
+def generate_while(gname, prog, statement):
+    return {
+        'name': gname,
+        'lines': [],
+        'control': {"operator": 'while', "body": []}
+    }, None
+
 
 def gen_group(gname, prog, statement):
     typ = statement['type']
@@ -98,7 +116,10 @@ def gen_group(gname, prog, statement):
         if name in prog['locals']:
             # We know it's a register
             return assign_reg(gname, prog, statement)
+    elif typ == 'while':
+        return generate_while(gname, prog, statement)
     return None, None
+
 
 def generate_groups(prog):
     groups = []
@@ -112,10 +133,28 @@ def generate_groups(prog):
 
     return groups, cells
 
-def generate(prog): 
+
+def make_control(groups):
+    seq = []
+    for g in groups:
+        control = g['control']
+        if control['operator'] == 'enable':
+            seq += [f"{control['group']};"]
+        elif control['operator'] == 'while':
+            body = [make_control(x) for x in control['body']]
+            seq += [f""" while {control['port']} with {control['group']} {{
+{body}
+}}"""]
+        else:
+            pass
+    return seq
+
+
+def generate(prog):
     tmpl_file = sys.argv[1]
 
     groups, cells = generate_groups(prog)
+    control = make_control(groups)
 
     futil = None
     with open(tmpl_file) as f:
@@ -126,7 +165,8 @@ def generate(prog):
             size=size,
             index_width=index_width,
             groups=groups,
-            cells=cells
+            cells=cells,
+            control=control
         )
 
     outfile = sys.argv[3]
@@ -140,6 +180,7 @@ def main():
         prog = json.load(f)
 
     generate(prog)
+
 
 if __name__ == '__main__':
     main()

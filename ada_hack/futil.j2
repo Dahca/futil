@@ -3,21 +3,21 @@ import "primitives/std.lib";
 component main() -> () {
     cells {
         {% for input in prog['in'] %}
-        {{ input }} = prim std_mem_d1( {{ width[prog['in'][input]] }}, 
+        {{ input }} = prim std_mem_d1( {{ width[prog['in'][input]] }},
                                        {{ size[prog['in'][input]] }},
-                                       {{ index_width[prog['in'][input]] }} ); 
+                                       {{ index_width[prog['in'][input]] }} );
         {% endfor %}
 
-        output =  prim std_mem_d1( {{ width[prog['out']] }}, 
+        output =  prim std_mem_d1( {{ width[prog['out']] }},
                                     {{ size[prog['out']] }},
-                                    {{ index_width[prog['out']] }} ); 
+                                    {{ index_width[prog['out']] }} );
 
         {% for local in prog['locals'] %}
-        {{ local }} = prim std_reg( {{ width[prog['locals'][local]] }} ); 
+        {{ local }} = prim std_reg( {{ width[prog['locals'][local]] }} );
         {% endfor %}
 
         {% for cell in cells %}
-        {{ cell }} 
+        {{ cell }}
         {% endfor %}
     }
     wires {
@@ -30,6 +30,10 @@ component main() -> () {
         {% endfor %}
     }
     control {
-
+        seq {
+        {% for stmt in control %}
+          {{ stmt }}
+        {% endfor %}
+        }
     }
 }

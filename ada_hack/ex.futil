@@ -4,20 +4,20 @@ component main() -> () {
     cells {
         
 
-        output =  prim std_mem_d1( 32, 
+        output =  prim std_mem_d1( 32,
                                     1,
-                                    1 ); 
+                                    1 );
 
         
-        a = prim std_reg( 32 ); 
+        a = prim std_reg( 32 );
         
-        b = prim std_reg( 32 ); 
+        b = prim std_reg( 32 );
         
-        c = prim std_reg( 32 ); 
+        c = prim std_reg( 32 );
         
 
         
-        group_2_add = prim std_add(32) 
+        group_2_add = prim std_add(32);
         
     }
     wires {
@@ -58,6 +58,14 @@ component main() -> () {
         
     }
     control {
-
+        seq {
+        
+          group_0;
+        
+          group_1;
+        
+          group_2;
+        
+        }
     }
 }
