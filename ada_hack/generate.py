@@ -3,9 +3,11 @@ import sys
 import json
 import jinja2
 from jinja2 import Template
+from pprint import pprint
 
 width = {
     "int": 32,
+    "bool": 1,
 }
 size = {
     "int": 1,
@@ -94,30 +96,58 @@ def assign_reg(gname, prog, statement):
     lines += sublines
     lines += [f"{reg}.in = {port};"]
 
-    return {
+    return [{
         'name': gname,
         'lines': lines,
         'control': {"operator": 'enable', "group": gname}
-    }, cells
+    }], cells
 
 
 def generate_while(gname, prog, statement):
-    return {
-        'name': gname,
-        'lines': [],
-        'control': {"operator": 'while', "body": []}
-    }, None
+    # get condition
+    cond_reg_name = f"{gname}_cond_reg"
+
+    fake_assignment = {
+        "type": "assignment",
+        "name": cond_reg_name,
+        "value": statement['condition']
+    }
+    prog['locals'][cond_reg_name] = "bool"
+
+    group, cells = gen_group(f"{gname}", prog, fake_assignment)
+    group[0]['control']['operator'] = 'condition'
+
+    # body
+    body = []
+
+    for idx, stmt in enumerate(statement['body']):
+        stmt_groups, stmt_cells = gen_group(f"{gname}_body_{idx}", prog, stmt)
+        print(stmt_groups[0]['control'])
+        body += [stmt_groups[0]]
+        cells += stmt_cells
+
+    return [
+        group[0],
+        {
+            'name': gname,
+            'lines': [],
+            'control': {"operator": 'while', "body": body, "port": f"{cond_reg_name}.out", "group": group[0]}
+        }], cells
 
 
 def gen_group(gname, prog, statement):
     typ = statement['type']
+    print(statement)
     if typ == 'assignment':
         name = statement['name']
         if name in prog['locals']:
             # We know it's a register
             return assign_reg(gname, prog, statement)
+        else:
+            print(name)
     elif typ == 'while':
         return generate_while(gname, prog, statement)
+
     return None, None
 
 
@@ -128,7 +158,7 @@ def generate_groups(prog):
         name = f'group_{group_num}'
         group, gcells = gen_group(name, prog, statement)
         if group is not None:
-            groups += [group]
+            groups += group
             cells += gcells
 
     return groups, cells
@@ -141,10 +171,14 @@ def make_control(groups):
         if control['operator'] == 'enable':
             seq += [f"{control['group']};"]
         elif control['operator'] == 'while':
-            body = [make_control(x) for x in control['body']]
-            seq += [f""" while {control['port']} with {control['group']} {{
+            body = '\n'.join(make_control(control['body']))
+            seq += [f""" while {control['port']} with {control['group']['name']} {{
+            seq {{
 {body}
+            }}
 }}"""]
+        elif control['operator'] == 'condition':
+            pass
         else:
             pass
     return seq
@@ -155,6 +189,8 @@ def generate(prog):
 
     groups, cells = generate_groups(prog)
     control = make_control(groups)
+
+    groups = list(filter(lambda x: x['lines'] != [], groups))
 
     futil = None
     with open(tmpl_file) as f:

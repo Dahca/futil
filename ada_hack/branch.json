@@ -22,7 +22,7 @@ def branch() -> int:
 
     "statements" : [
         {
-            "type": "assignment", 
+            "type": "assignment",
             "name": "a",
             "value": {
                 "type": "const",
@@ -31,7 +31,7 @@ def branch() -> int:
         },
 
         {
-            "type": "assignment", 
+            "type": "assignment",
             "name": "b",
             "value": {
                 "type": "const",
@@ -39,7 +39,7 @@ def branch() -> int:
             }
         },
         {
-            "type": "assignment", 
+            "type": "assignment",
             "name": "c",
             "value": {
                 "type": "const",
@@ -47,7 +47,7 @@ def branch() -> int:
             }
         },
         {
-            "type": "if", 
+            "type": "if",
             "condition": {
                 "type": "binary",
                 "op": "lt",
