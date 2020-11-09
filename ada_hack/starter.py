@@ -420,7 +420,7 @@ def factorial(n):
         n -= 1
     return ret
 
-@futil
+#@futil
 def while_test(input1, input2, input3, input4):
     result = 0
     if true:
@@ -431,9 +431,28 @@ def while_test(input1, input2, input3, input4):
             result = input1
     return result
 
+@futil
+def fake_matmul(i_dim, j_dim, k_dim):
+    # Kind of a silly matrix multiplication example because we don't handle lists;
+    # just assumes that the matrices have elements from 1, 2, 3...
+    i = 0
+    ret = 0
+    while i < i_dim:
+        j = 0
+        while j < j_dim:
+            k = 0
+            while k < k_dim:
+                # m1[i][j]*m2[j][k]
+                # we can't assemble a new matrix so we're just summing...
+                ret += (i*i_dim+j)*(j*j_dim + k)
+                k += 1
+            j += 1
+        i += 1
+    return ret
+
 def main():
     # foo is no longer a function, but a string
-    print(while_test)
+    print(fake_matmul)
 
 
 if __name__ == "__main__":
