@@ -114,7 +114,7 @@ class Backend(ast.NodeVisitor):
 
         for else_stmt in node.orelse:
             self.push_context(stmt['else_body'])
-            self.visit(body_stmt)
+            self.visit(else_stmt)
             self.pop_context()            
 
         self.append_stmt(stmt)
@@ -388,13 +388,16 @@ def futil(f):
 
 
 # transforms the function into a string
-@futil
+
+# Bunch of test cases -- uncomment @futil to see the result
+
+#@futil
 def foo(x):
     pass
     pass
     return x
 
-@futil
+#@futil
 def fibonacci(n):
     a = 0
     b = 1
@@ -407,9 +410,30 @@ def fibonacci(n):
         i += 1
     return prev
 
+#@futil
+def factorial(n):
+    if n == 0:
+        return 1
+    ret = 1
+    while n > 0:
+        ret *= n
+        n -= 1
+    return ret
+
+@futil
+def while_test(input1, input2, input3, input4):
+    result = 0
+    if true:
+        if true:
+            while false:
+                result = 1
+        else:
+            result = input1
+    return result
+
 def main():
     # foo is no longer a function, but a string
-    print(fibonacci)
+    print(while_test)
 
 
 if __name__ == "__main__":
