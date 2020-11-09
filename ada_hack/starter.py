@@ -41,6 +41,8 @@ class Backend(ast.NodeVisitor):
     def update_locals(self, name, type_str='int'):
         if name in self.dump['locals']:
             return
+        if name in self.dump['in']:
+            return
         self.dump['locals'][name] = type_str
 
     def visit(self, node):
