@@ -1,0 +1,135 @@
+{
+    "comment": "
+def fibonacci(n: int) -> int:
+	a = 0
+	b = 1
+	i = 0
+    prev = 0
+	while i < n:
+    		b = a + b
+    		a = prev
+   	 	    prev = b 
+    		i += 1
+	return prev
+    ",
+
+    "in": {
+        "n": "int"
+    },
+
+    "out": "int",
+
+    "locals": {
+        "a": "int",
+        "b": "int",
+        "i": "int",
+        "prev": "int"
+    },
+
+    "statements": [
+        {
+            "type": "assignment", 
+            "name": "a",
+            "value": {
+                "type": "const",
+                "value": 0
+            }
+        },
+        {
+            "type": "assignment", 
+            "name": "b",
+            "value": {
+                "type": "const",
+                "value": 1
+            }
+        },
+        {
+            "type": "assignment", 
+            "name": "i",
+            "value": {
+                "type": "const",
+                "value": 0
+            }
+        },
+        {
+            "type": "assignment", 
+            "name": "prev",
+            "value": {
+                "type": "const",
+                "value": 0
+            }
+        },
+        {
+            "type": "while", 
+            "condition": {
+                "type": "binary",
+                "op": "lt",
+                "left": {
+                    "type": "identifier",
+                    "name": "i"
+                },
+                "right": {
+                    "type": "identifer",
+                    "name": "n"
+                }
+            },
+            "body": [
+                {
+                    "type": "assignment",
+                    "left": "b",
+                    "right": {
+                        "type": "binary",
+                        "op": "plus",
+                        "left": {
+                            "type": "identifier",
+                            "name": "a",
+                        },
+                        "right": {
+                            "type": "identifier",
+                            "name": "b"
+                        }
+                    }
+                },
+                {
+                    "type": "assignment",
+                    "left": "a",
+                    "right": {
+                        "type": "identifier",
+                        "name": "prev"
+                    }
+                },
+                {
+                    "type": "assignment",
+                    "left": "prev",
+                    "right": {
+                        "type": "identifier",
+                        "name": "b"
+                    }
+                },
+                {
+                    "type": "assignment",
+                    "left": "i",
+                    "right": {
+                        "type": "binary",
+                        "op": "plus",
+                        "left": {
+                            "type": "identifier",
+                            "name": "i",
+                        },
+                        "right": {
+                            "type": "const",
+                            "name": 1
+                        }
+                    }
+                },
+            ]
+        },
+        {
+            "type": "return",
+            "value": {
+                "type": "identifier",
+                "name": "prev"
+            }
+        }
+    ]
+}   
