@@ -1,11 +1,4 @@
 {
-    "comment": "
-def add():
-    a = 1
-    b = 2
-    c = a + b
-    return c
-",
     "in": {
     },
 
@@ -14,7 +7,7 @@ def add():
     "locals": {
         "a": "int",
         "b": "int",
-        "c": "int",
+        "c": "int"
     },
 
     "statements" : [
@@ -37,13 +30,13 @@ def add():
         },
         {
             "type": "assignment",
-            "left": "c",
-            "right": {
+            "name": "c",
+            "value": {
                 "type": "binary",
                 "op": "plus",
                 "left": {
                     "type": "identifier",
-                    "name": "a",
+                    "name": "a"
                 },
                 "right": {
                     "type": "identifier",

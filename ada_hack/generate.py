@@ -14,14 +14,67 @@ index_width = {
     "int": 1,
 }
 
-def generate_const(reg, prog, statement):
+def get_reg_width(prog, reg):
+    reg_type = prog['locals'][reg]
+    return width[reg_type]
+
+def generate_const(gname, reg, prog, value):
     reg_type = prog['locals'][reg]
     w = width[reg_type]
-    value = statement['value']['value']
+    v = value['value']
+    
+    port = f"{w}'d{v}"
     lines = []
-    port = f"{w}'d{value}"
+    cells = []
 
-    return port, lines
+    return port, lines, cells
+
+def generate_indentifier(gname, reg, prog, value):
+    name = value['name']
+    if name in prog['locals']:
+        port = f"{name}.out"
+    else:
+        port = f"{name}.read_data"
+    
+    lines = []
+    cells = []
+
+    return port, lines, cells
+
+def generate_binary(gname, reg, prog, value):
+    op = value['op']
+    left = value['left']
+    right = value['right']
+
+    lport, llines, lcells = generate_value(gname, reg, prog, left)
+    rport, rlines, rcells = generate_value(gname, reg, prog, right)
+
+    cells = lcells + rcells
+    lines = llines + rlines
+    regw = get_reg_width(prog, reg)
+
+    aname = f"{gname}_add"
+
+    if op == 'plus':
+        cells += [f"{aname} = prim std_add({regw});"]
+    
+    lines += [f"{aname}.left = {lport};"]
+    lines += [f"{aname}.right = {rport};"]
+    
+    port = f"{aname}.out"
+    return port, lines, cells
+
+
+def generate_value(gname, reg, prog, value):
+    if value['type'] == 'const':
+        return generate_const(gname, reg, prog, value)
+    elif value['type'] == 'binary':
+        return generate_binary(gname, reg, prog, value)
+    elif value['type'] == 'identifier':
+        return generate_indentifier(gname, reg, prog, value)
+    else:
+        print(value)
+        return None, None, None
 
 def assign_reg(gname, prog, statement):
     reg = statement['name']
@@ -31,14 +84,12 @@ def assign_reg(gname, prog, statement):
     lines += [ f"{gname}[done] = {reg}.done;" ]
     lines += [ f"{reg}.write_en = 1'd1;"]
 
-    port = None
-    if value['type'] == 'const':
-        port, sublines = generate_const(reg, prog, statement)
-
+    port, sublines, cells = generate_value(gname, reg, prog, value)
+    
     lines += sublines
     lines += [ f"{reg}.in = {port};"]
 
-    return {'name': gname, 'lines': lines}
+    return {'name': gname, 'lines': lines}, cells
 
 def gen_group(gname, prog, statement):
     typ = statement['type']
@@ -47,22 +98,24 @@ def gen_group(gname, prog, statement):
         if name in prog['locals']:
             # We know it's a register
             return assign_reg(gname, prog, statement)
-    return None
+    return None, None
 
 def generate_groups(prog):
     groups = []
+    cells = []
     for group_num, statement in enumerate(prog['statements']):
         name = f'group_{group_num}'
-        group = gen_group(name, prog, statement)
+        group, gcells = gen_group(name, prog, statement)
         if group is not None:
             groups += [group]
+            cells += gcells
 
-    return groups
+    return groups, cells
 
 def generate(prog): 
     tmpl_file = sys.argv[1]
 
-    groups = generate_groups(prog)
+    groups, cells = generate_groups(prog)
 
     futil = None
     with open(tmpl_file) as f:
@@ -72,7 +125,8 @@ def generate(prog):
             width=width,
             size=size,
             index_width=index_width,
-            groups=groups
+            groups=groups,
+            cells=cells
         )
 
     outfile = sys.argv[3]

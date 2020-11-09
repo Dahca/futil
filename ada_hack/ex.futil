@@ -3,10 +3,6 @@ import "primitives/std.lib";
 component main() -> () {
     cells {
         
-        n = prim std_mem_d1( 32, 
-                                       1,
-                                       1 ); 
-        
 
         output =  prim std_mem_d1( 32, 
                                     1,
@@ -17,9 +13,11 @@ component main() -> () {
         
         b = prim std_reg( 32 ); 
         
-        i = prim std_reg( 32 ); 
+        c = prim std_reg( 32 ); 
         
-        prev = prim std_reg( 32 ); 
+
+        
+        group_2_add = prim std_add(32) 
         
     }
     wires {
@@ -30,7 +28,7 @@ component main() -> () {
             
                 a.write_en = 1'd1;
             
-                a.in = 32'd0;
+                a.in = 32'd1;
             
         }
         
@@ -40,27 +38,21 @@ component main() -> () {
             
                 b.write_en = 1'd1;
             
-                b.in = 32'd1;
+                b.in = 32'd2;
             
         }
         
         group group_2 {
             
-                group_2[done] = i.done;
+                group_2[done] = c.done;
             
-                i.write_en = 1'd1;
+                c.write_en = 1'd1;
             
-                i.in = 32'd0;
+                group_2_add.left = a.out;
             
-        }
-        
-        group group_3 {
+                group_2_add.right = b.out;
             
-                group_3[done] = prev.done;
-            
-                prev.write_en = 1'd1;
-            
-                prev.in = 32'd0;
+                c.in = group_2_add.out;
             
         }
         

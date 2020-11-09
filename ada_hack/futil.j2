@@ -15,6 +15,10 @@ component main() -> () {
         {% for local in prog['locals'] %}
         {{ local }} = prim std_reg( {{ width[prog['locals'][local]] }} ); 
         {% endfor %}
+
+        {% for cell in cells %}
+        {{ cell }} 
+        {% endfor %}
     }
     wires {
         {% for group in groups %}
