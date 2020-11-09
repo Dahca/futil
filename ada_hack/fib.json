@@ -1,0 +1,112 @@
+{
+  "in": {
+    "n": "int"
+  },
+  "out": "int",
+  "locals": {
+    "a": "int",
+    "b": "int",
+    "i": "int",
+    "prev": "int"
+  },
+  "statements": [
+    {
+      "type": "assignment",
+      "name": "a",
+      "value": {
+        "type": "const",
+        "value": 0
+      }
+    },
+    {
+      "type": "assignment",
+      "name": "b",
+      "value": {
+        "type": "const",
+        "value": 1
+      }
+    },
+    {
+      "type": "assignment",
+      "name": "i",
+      "value": {
+        "type": "const",
+        "value": 0
+      }
+    },
+    {
+      "type": "assignment",
+      "name": "prev",
+      "value": {
+        "type": "const",
+        "value": 0
+      }
+    },
+    {
+      "type": "while",
+      "condition": {
+        "type": "binary",
+        "left": {
+          "type": "identifier",
+          "name": "i"
+        },
+        "right": {
+          "type": "identifier",
+          "name": "n"
+        },
+        "op": "lt"
+      },
+      "body": [
+        {
+          "type": "assignment",
+          "name": "b",
+          "value": {
+            "type": "binary",
+            "op": "plus",
+            "left": {
+              "type": "identifier",
+              "name": "a"
+            },
+            "right": {
+              "type": "identifier",
+              "name": "b"
+            }
+          }
+        },
+        {
+          "type": "assignment",
+          "name": "a",
+          "value": {
+            "type": "identifier",
+            "name": "prev"
+          }
+        },
+        {
+          "type": "assignment",
+          "name": "prev",
+          "value": {
+            "type": "identifier",
+            "name": "b"
+          }
+        },
+        {
+          "type": "assignment",
+          "name": "i",
+          "value": {
+            "type": "binary",
+            "op": "plus",
+            "left": {
+              "type": "identifier",
+              "name": "i"
+            },
+            "right": {
+              "type": "const",
+              "value": 1
+            }
+          }
+        }
+      ]
+    }
+
+  ]
+}
