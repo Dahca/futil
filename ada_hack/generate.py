@@ -190,7 +190,9 @@ def generate(prog):
     groups, cells = generate_groups(prog)
     control = make_control(groups)
 
-    groups = list(filter(lambda x: x['lines'] != [], groups))
+    pprint(groups)
+
+    # groups = list(filter(lambda x: x['lines'] != [], groups))
 
     futil = None
     with open(tmpl_file) as f:

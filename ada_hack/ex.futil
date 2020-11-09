@@ -1,103 +1,171 @@
-  import "primitives/std.lib";
+import "primitives/std.lib";
 
 component main() -> () {
     cells {
-
+        
         n = prim std_mem_d1( 32,
                                        1,
                                        1 );
-
+        
 
         output =  prim std_mem_d1( 32,
                                     1,
                                     1 );
 
-
+        
         a = prim std_reg( 32 );
-
+        
         b = prim std_reg( 32 );
-
+        
         i = prim std_reg( 32 );
-
+        
         prev = prim std_reg( 32 );
-
+        
         group_4_cond_reg = prim std_reg( 1 );
+        
 
-
-
+        
         group_4_body_0_add = prim std_add(32);
-
+        
         group_4_body_3_add = prim std_add(32);
-
+        
     }
     wires {
-
+        
+        
         group group_0 {
-
+            
                 group_0[done] = a.done;
-
+            
                 a.write_en = 1'd1;
-
+            
                 a.in = 32'd0;
-
+            
         }
-
+        
+        
+        
+        
         group group_1 {
-
+            
                 group_1[done] = b.done;
-
+            
                 b.write_en = 1'd1;
-
+            
                 b.in = 32'd1;
-
+            
         }
-
+        
+        
+        
+        
         group group_2 {
-
+            
                 group_2[done] = i.done;
-
+            
                 i.write_en = 1'd1;
-
+            
                 i.in = 32'd0;
-
+            
         }
-
+        
+        
+        
+        
         group group_3 {
-
+            
                 group_3[done] = prev.done;
-
+            
                 prev.write_en = 1'd1;
-
+            
                 prev.in = 32'd0;
-
+            
         }
-
+        
+        
+        
+        
         group group_4 {
-
+            
                 group_4[done] = group_4_cond_reg.done;
-
+            
                 group_4_cond_reg.write_en = 1'd1;
-
+            
                 group_4_add.left = i.out;
-
+            
                 group_4_add.right = n.read_data;
-
+            
                 group_4_cond_reg.in = group_4_add.out;
-
+            
         }
-
+        
+        
+        
+        
+        
+            
+        group group_4_body_0 {
+            
+                group_4_body_0[done] = b.done;
+            
+                b.write_en = 1'd1;
+            
+                group_4_body_0_add.left = a.out;
+            
+                group_4_body_0_add.right = b.out;
+            
+                b.in = group_4_body_0_add.out;
+            
+        }
+            
+        group group_4_body_1 {
+            
+                group_4_body_1[done] = a.done;
+            
+                a.write_en = 1'd1;
+            
+                a.in = prev.out;
+            
+        }
+            
+        group group_4_body_2 {
+            
+                group_4_body_2[done] = prev.done;
+            
+                prev.write_en = 1'd1;
+            
+                prev.in = b.out;
+            
+        }
+            
+        group group_4_body_3 {
+            
+                group_4_body_3[done] = i.done;
+            
+                i.write_en = 1'd1;
+            
+                group_4_body_3_add.left = i.out;
+            
+                group_4_body_3_add.right = 32'd1;
+            
+                i.in = group_4_body_3_add.out;
+            
+        }
+            
+        
+        
     }
     control {
         seq {
-
+        
           group_0;
-
+        
           group_1;
-
+        
           group_2;
-
+        
           group_3;
-
+        
            while group_4_cond_reg.out with group_4 {
             seq {
 group_4_body_0;
@@ -106,7 +174,7 @@ group_4_body_2;
 group_4_body_3;
             }
 }
-
+        
         }
     }
 }

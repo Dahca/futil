@@ -22,11 +22,22 @@ component main() -> () {
     }
     wires {
         {% for group in groups %}
+        {% if group['lines'] %}
         group {{ group['name'] }} {
             {% for line in group['lines'] %}
                 {{ line }}
             {% endfor %}
         }
+        {% endif %}
+        {% if 'control' in group and 'body' in group['control'] %}
+            {% for b in group['control']['body'] %}
+        group {{ b['name'] }} {
+            {% for line in b['lines'] %}
+                {{ line }}
+            {% endfor %}
+        }
+            {% endfor %}
+        {% endif %}
         {% endfor %}
     }
     control {
