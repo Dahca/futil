@@ -1,0 +1,91 @@
+{
+    "comment": "
+def branch() -> int:
+    a = 2
+    b = 0
+    c = 0
+    if a > b:
+        c = a + b
+    return c
+
+",
+    "in": {
+    },
+
+    "out": "int",
+
+    "locals": {
+        "a": "int",
+        "b": "int",
+        "c": "int",
+    },
+
+    "statements" : [
+        {
+            "type": "assignment", 
+            "name": "a",
+            "value": {
+                "type": "const",
+                "value": 2
+            }
+        },
+
+        {
+            "type": "assignment", 
+            "name": "b",
+            "value": {
+                "type": "const",
+                "value": 0
+            }
+        },
+        {
+            "type": "assignment", 
+            "name": "c",
+            "value": {
+                "type": "const",
+                "value": 0
+            }
+        },
+        {
+            "type": "if", 
+            "condition": {
+                "type": "binary",
+                "op": "lt",
+                "left": {
+                    "type": "identifier",
+                    "name": "a"
+                },
+                "right": {
+                    "type": "identifer",
+                    "name": "b"
+                }
+            },
+            "body": [
+                {
+                    "type": "assignment",
+                    "left": "c",
+                    "right": {
+                        "type": "binary",
+                        "op": "plus",
+                        "left": {
+                            "type": "identifier",
+                            "name": "a",
+                        },
+                        "right": {
+                            "type": "identifier",
+                            "name": "b"
+                        }
+                    }
+                },
+
+            ]
+        },
+        {
+            "type": "return",
+            "value": {
+                "type": "identifier",
+                "name": "c"
+            }
+        }
+    ]
+}

@@ -1,0 +1,62 @@
+{
+    "comment": "
+def add():
+    a = 1
+    b = 2
+    c = a + b
+    return c
+",
+    "in": {
+    },
+
+    "out": "int",
+
+    "locals": {
+        "a": "int",
+        "b": "int",
+        "c": "int",
+    },
+
+    "statements" : [
+        {
+            "type": "assignment", 
+            "name": "a",
+            "value": {
+                "type": "const",
+                "value": 1
+            }
+        },
+
+        {
+            "type": "assignment", 
+            "name": "b",
+            "value": {
+                "type": "const",
+                "value": 2
+            }
+        },
+        {
+            "type": "assignment",
+            "left": "c",
+            "right": {
+                "type": "binary",
+                "op": "plus",
+                "left": {
+                    "type": "identifier",
+                    "name": "a",
+                },
+                "right": {
+                    "type": "identifier",
+                    "name": "b"
+                }
+            }
+        },
+        {
+            "type": "return",
+            "value": {
+                "type": "identifier",
+                "name": "c"
+            }
+        }
+    ]
+}
